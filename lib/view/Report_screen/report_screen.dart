@@ -111,6 +111,43 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ],
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    const Text(
+                      "Inicio Quincena",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      selectedQuincena == "Primera Quincena"
+                          ? "1-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}"
+                          : "16-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    const Text(
+                      "Fin Quincena",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      selectedQuincena == "Primera Quincena"
+                          ? "15-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}"
+                          : "${DateTime(selectedYear, selectedMonth + 1, 0).day}-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
             DropdownButton<String>(
               value: selectedQuincena,
@@ -135,6 +172,7 @@ class _ReportScreenState extends State<ReportScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
                         columns: const [
@@ -143,18 +181,45 @@ class _ReportScreenState extends State<ReportScreen> {
                           DataColumn(label: Text('Precio')),
                           DataColumn(label: Text('Total')),
                         ],
-                        rows: _filterData()
-                            .map(
-                              (milkModel) => DataRow(
-                                cells: [
-                                  DataCell(Text(milkModel.fecha)),
-                                  DataCell(Text(milkModel.litros.toString())),
-                                  DataCell(Text(milkModel.precio.toString())),
-                                  DataCell(Text(milkModel.total.toString())),
-                                ],
-                              ),
-                            )
-                            .toList(),
+                        rows: [
+                          ..._filterData().map(
+                            (milkModel) => DataRow(
+                              cells: [
+                                DataCell(Text(milkModel.fecha)),
+                                DataCell(Text(milkModel.litros.toString())),
+                                DataCell(Text(milkModel.precio.toString())),
+                                DataCell(Text(milkModel.total.toString())),
+                              ],
+                            ),
+                          ),
+                          // Fila de totales
+                          DataRow(
+                            cells: [
+                              const DataCell(Text(
+                                'Total',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
+                              DataCell(Text(
+                                _filterData()
+                                    .fold<double>(
+                                        0.0, (sum, item) => sum + item.litros)
+                                    .toStringAsFixed(2),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              )),
+                              const DataCell(
+                                  Text('')), // Celda vacía para "Precio"
+                              DataCell(Text(
+                                _filterData()
+                                    .fold<double>(
+                                        0.0, (sum, item) => sum + item.total)
+                                    .toStringAsFixed(2),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              )),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
             ),
