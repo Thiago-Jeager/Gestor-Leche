@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/const/images.dart';
 import 'package:flutter_milk_app/view/Home_screen/home_screen.dart';
+import 'package:flutter_milk_app/view/Register_screen/table_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter_milk_app/controller/home_controller.dart';
 
@@ -25,7 +26,7 @@ class Home extends StatelessWidget {
 
     var navBody = [
       const HomeScreen(),
-      const Text("home"),
+      const TableComplexExample(),
       const Text("home"),
       const Text("home"),
     ];

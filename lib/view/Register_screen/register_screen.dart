@@ -1,7 +1,14 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/controller/milk_controller.dart';
+import 'package:flutter_milk_app/model/milk_model.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+int getHashCode(DateTime key) {
+  return key.day * 1000000 + key.month * 10000 + key.year;
+}
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -16,8 +23,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _fechaController = TextEditingController();
   final TextEditingController _litrosController = TextEditingController();
   final TextEditingController _precioController = TextEditingController();
-  //final TextEditingController _totalController = TextEditingController();
 
+  final LinkedHashMap<DateTime, List<Event>> kEvents = LinkedHashMap(
+    equals: isSameDay,
+    hashCode: getHashCode,
+  );
   Future<void> _guardarRegistro() async {
     await _controller.agregarRegistroSiValido(
       fecha: _fechaController.text,
@@ -28,6 +38,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _precioController.clear();
   }
 
+  Future<void> cargarEventosDesdeBaseDeDatos() async {
+    final registros = await _controller.obtenerRegistros();
+
+    setState(() {
+      kEvents.clear();
+      for (var registro in registros) {
+        final partesFecha = registro['fecha'].split('-');
+        final fecha = DateTime(
+          int.parse(partesFecha[0]),
+          int.parse(partesFecha[1]),
+          int.parse(partesFecha[2]),
+        );
+
+        if (kEvents[fecha] == null) {
+          kEvents[fecha] = [];
+        }
+
+        kEvents[fecha]!.add(Event(
+            'Litros: ${registro['litros']}, Precio: ${registro['precio']}, Total: ${registro['total']}'));
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fechaController.text =
+        '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}';
+    cargarEventosDesdeBaseDeDatos();
+    //_cargarRegistrosDelDia();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,159 +78,133 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: backgroundWhite,
         title: const Text('Seleccionar Fecha y Número'),
       ),
-      body: Container(
-        color: backgroundWhite,
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TableCalendar(
-                locale: 'es_ES', // Configura el idioma a español
-                firstDay: DateTime(2000),
-                lastDay: DateTime.now(),
-                focusedDay: _selectedDate,
-                selectedDayPredicate: (day) => isSameDay(day, _selectedDate),
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDate = selectedDay;
-                  });
-                },
-                calendarStyle: const CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: hunterGreen,
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: ashGray,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                headerStyle: const HeaderStyle(
-                  formatButtonVisible: false, // Oculta el botón de formato
-                  titleCentered: true,
-                ),
+      body: Column(
+        children: [
+          TableCalendar<Event>(
+            locale: 'es_ES',
+            firstDay: DateTime(2000),
+            lastDay: DateTime.now(),
+            focusedDay: _selectedDate,
+            selectedDayPredicate: (day) => isSameDay(day, _selectedDate),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDate = selectedDay;
+              });
+              //_cargarRegistrosDelDia();
+            },
+            eventLoader: (day) {
+              return kEvents[day] ?? [];
+            },
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: hunterGreen,
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: TextField(
-                        controller: _litrosController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Litros',
-                          labelStyle: TextStyle(color: textblack),
-                          border: OutlineInputBorder(),
-                          filled: true,
-                          fillColor: backgroundWhite,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: hunterGreen, width: 2.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: TextField(
-                        controller: _precioController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Precio',
-                          labelStyle: TextStyle(color: textblack),
-                          border: OutlineInputBorder(),
-                          filled: true,
-                          fillColor: backgroundWhite,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: hunterGreen, width: 2.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              selectedDecoration: BoxDecoration(
+                color: ashGray,
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: textblack, // Cambia el color de fondo
-                  foregroundColor: ashGray2, // Cambia el color de la letra
-                ),
-                onPressed: () {
-                  String litros = _litrosController.text;
-                  String precio = _precioController.text;
-                  String fecha =
-                      '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}';
-                  _fechaController.text = fecha; // Actualiza el campo de fecha
-                  if (litros.isEmpty || precio.isEmpty) {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return const AlertDialog(
-                            backgroundColor: backgroundWhite,
-                            title: Text('Error'),
-                            content: Text(
-                                'Por favor, completa todos los campos.',
-                                style: TextStyle(color: textblack)),
-                          );
-                        });
-                    return;
-                  }
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        backgroundColor: backgroundWhite,
-                        title: const Text('Confirmar Registro'),
-                        content: Text(
-                          'Fecha: $fecha\nLitros: $litros\nPrecio: $precio\n\n¿Deseas guardar esta información?',
-                        ),
-                        actions: [
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              backgroundColor: hunterGreen,
-                              foregroundColor: backgroundWhite,
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Cierra el diálogo
-                            },
-                            child: const Text('Cancelar'),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: hunterGreen,
-                              foregroundColor: backgroundWhite,
-                            ),
-                            onPressed: () {
-                              _guardarRegistro();
-                              Navigator.of(context).pop(); // Cierra el diálogo
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Registro guardado: Fecha: $fecha - Litros: $litros - Precio: $precio',
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text('Guardar'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: const Text('Guardar Registro'),
-              ),
-            ],
+            ),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+            ),
           ),
-        ),
+          const SizedBox(height: 8.0),
+          Expanded(
+            child: ValueListenableBuilder<List<Event>>(
+              valueListenable: ValueNotifier(kEvents[_selectedDate] ?? []),
+              builder: (context, value, _) {
+                if (value.isEmpty) {
+                  return Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Acción para agregar un nuevo registro
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Agregar Registro'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: _litrosController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Litros',
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                  TextField(
+                                    controller: _precioController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Precio',
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Cancelar'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final fecha =
+                                        '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}';
+                                    _fechaController.text = fecha;
+                                    _guardarRegistro();
+                                    cargarEventosDesdeBaseDeDatos();
+                                    Navigator.of(context)
+                                        .pop(); // Cierra el diálogo
+                                  },
+                                  child: const Text('Guardar'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text('Agregar Registro'),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: value.length,
+                  itemBuilder: (context, index) {
+                    final event = value[index];
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 4.0,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: ListTile(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                'Litros: ${event.title.split(',')[0].split(':')[1].trim()}'),
+                            Text(
+                                'Precio: ${event.title.split(',')[1].split(':')[1].trim()}'),
+                            Text(
+                                'Total: ${event.title.split(',')[2].split(':')[1].trim()}'),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

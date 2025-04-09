@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/const/images.dart';
 import 'package:flutter_milk_app/view/Register_screen/register_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_milk_app/view/Report_screen/report_screen.dart';
+import 'package:flutter_milk_app/widget/button.dart';
 import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -48,6 +50,14 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
+                    Text(DateFormat.yMMMMd('es_ES').format(DateTime.now()),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: textblack,
+                        )),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -81,72 +91,12 @@ class HomeScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            Get.to(() => const RegisterScreen());
-                          },
-                          child: Container(
-                            height: 100,
-                            width: 150,
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: backgroundWhite,
-                              border: Border.all(color: hunterGreen, width: 2),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5.0,
-                                  spreadRadius: 1.0,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                "Ingresar Registro",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: textblack,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Get.to(() => ReportScreen());
-                          },
-                          child: Container(
-                            height: 100,
-                            width: 150,
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: backgroundWhite,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: hunterGreen, width: 2),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5.0,
-                                  spreadRadius: 1.0,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Text(
-                                "Ver Reporte",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: textblack,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        Button(
+                            label: "Registrar",
+                            onTap: () => Get.to(() => const RegisterScreen())),
+                        Button(
+                            label: "Ver Reporte",
+                            onTap: () => Get.to(() => ReportScreen())),
                       ],
                     ),
                   ],
