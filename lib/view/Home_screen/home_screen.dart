@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/const/images.dart';
 import 'package:flutter_milk_app/view/Register_screen/register_screen.dart';
+import 'package:flutter_milk_app/view/Report_screen/report_screen.dart';
 import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -115,7 +116,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         GestureDetector(
                           onTap: () {
-                            // Agrega la lógica de navegación para "Ver Reporte" aquí
+                            Get.to(() => ReportScreen());
                           },
                           child: Container(
                             height: 100,
