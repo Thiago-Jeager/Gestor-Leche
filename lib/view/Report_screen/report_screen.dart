@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
+import 'package:flutter_milk_app/const/const.dart';
+import 'package:flutter_milk_app/controller/milk_controller.dart';
+import 'package:flutter_milk_app/model/milk_model.dart';
+import 'package:flutter_milk_app/widget/report_button.dart';
+import 'package:intl/intl.dart';
 
 class ReportScreen extends StatefulWidget {
   @override
@@ -7,54 +12,192 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
+  final MilkController _controller = MilkController();
+  List<MilkModel> _data =
+      []; // Lista para almacenar los datos de la base de datos
+  bool _isLoading = true; // Indicador de carga
+
   int selectedMonth = DateTime.now().month;
   int selectedYear = DateTime.now().year;
   String selectedQuincena = "Primera Quincena";
 
-  final List<String> months = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre"
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadData(); // Cargar los datos al iniciar la vista
+  }
 
-  List<Map<String, dynamic>> data = [
-    {"fecha": "01/03/2024", "litros": 100, "precio": 200},
-    {"fecha": "02/03/2024", "litros": 100, "precio": 200},
-    {"fecha": "15/03/2024", "litros": 120, "precio": 240},
-    {"fecha": "20/03/2024", "litros": 130, "precio": 260},
-    {"fecha": "01/04/2024", "litros": 110, "precio": 220},
-    {"fecha": "15/04/2024", "litros": 130, "precio": 260},
-    {"fecha": "25/04/2024", "litros": 140, "precio": 280},
-  ];
+  Future<void> _loadData() async {
+    final registros = await _controller.obtenerRegistros();
+    setState(() {
+      _data = registros.map((registro) {
+        // Asegúrate de que la fecha tenga el formato correcto
+        final partesFecha = registro['fecha'].split('-');
+        final fechaFormateada =
+            '${partesFecha[0]}-${partesFecha[1].padLeft(2, '0')}-${partesFecha[2].padLeft(2, '0')}';
+        return MilkModel.fromMap({
+          ...registro,
+          'fecha':
+              fechaFormateada, // Reemplaza la fecha con el formato correcto
+        });
+      }).toList();
+      _isLoading = false; // Finaliza la carga
+    });
+  }
+
+  List<MilkModel> _filterData() {
+    final int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
+    final int quincenaStart = selectedQuincena == "Primera Quincena" ? 1 : 16;
+    final int quincenaEnd =
+        selectedQuincena == "Primera Quincena" ? 15 : daysInMonth;
+
+    return _data.where((milkModel) {
+      final DateTime rowDate = DateTime.parse(milkModel.fecha);
+      return rowDate.year == selectedYear &&
+          rowDate.month == selectedMonth &&
+          rowDate.day >= quincenaStart &&
+          rowDate.day <= quincenaEnd;
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: backgroundWhite,
+      appBar: AppBar(
+        backgroundColor: backgroundWhite,
+        title: const Text('Reporte'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Center(
+              child: Text(
+                DateFormat.yMMMMd('es_ES').format(DateTime.now()),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    ReportButton(
+                      label: "Mes",
+                      onTap: () => _selectMonth(context),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      months[selectedMonth - 1],
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    ReportButton(
+                      label: "Año",
+                      onTap: () => _selectYear(context),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      selectedYear.toString(),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            DropdownButton<String>(
+              value: selectedQuincena,
+              items: const [
+                DropdownMenuItem(
+                  value: "Primera Quincena",
+                  child: Text("Primera Quincena"),
+                ),
+                DropdownMenuItem(
+                  value: "Segunda Quincena",
+                  child: Text("Segunda Quincena"),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  selectedQuincena = value!;
+                });
+              },
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columns: const [
+                          DataColumn(label: Text('Fecha')),
+                          DataColumn(label: Text('Litros')),
+                          DataColumn(label: Text('Precio')),
+                          DataColumn(label: Text('Total')),
+                        ],
+                        rows: _filterData()
+                            .map(
+                              (milkModel) => DataRow(
+                                cells: [
+                                  DataCell(Text(milkModel.fecha)),
+                                  DataCell(Text(milkModel.litros.toString())),
+                                  DataCell(Text(milkModel.precio.toString())),
+                                  DataCell(Text(milkModel.total.toString())),
+                                ],
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _selectMonth(BuildContext context) async {
     final int? pickedMonth = await showDialog<int>(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: Text("Seleccionar Mes"),
+          backgroundColor: backgroundWhite,
+          title: const Center(child: Text("Seleccionar Mes")),
           children: [
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 10,
-              children: months.asMap().entries.map((entry) {
-                return ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, entry.key + 1);
-                  },
-                  child: Text(entry.value),
-                );
-              }).toList(),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Center(
+                child: Wrap(
+                  spacing: 20,
+                  runSpacing: 20,
+                  alignment: WrapAlignment.center,
+                  children: months.asMap().entries.map((entry) {
+                    return SizedBox(
+                      width: MediaQuery.of(context).size.width / 3 - 20,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: cambridgeBlue,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context, entry.key + 1);
+                        },
+                        child: Text(
+                          entry.value,
+                          style: const TextStyle(color: textblack),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
           ],
         );
@@ -73,20 +216,36 @@ class _ReportScreenState extends State<ReportScreen> {
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: const Text("Seleccionar Año"),
+          backgroundColor: backgroundWhite,
+          title: const Center(child: Text("Seleccionar Año")),
           children: [
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 10,
-              children: List.generate(50, (index) => 2020 + index).map((year) {
-                return ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, year);
-                  },
-                  child: Text(year.toString()),
-                );
-              }).toList(),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Center(
+                child: Wrap(
+                  spacing: 20,
+                  runSpacing: 20,
+                  alignment: WrapAlignment.center,
+                  children: List.generate(DateTime.now().year - 2020 + 1,
+                      (index) => 2020 + index).map((year) {
+                    return SizedBox(
+                      width: MediaQuery.of(context).size.width / 3 - 20,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: cambridgeBlue,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context, year);
+                        },
+                        child: Text(
+                          year.toString(),
+                          style: const TextStyle(color: textblack),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
           ],
         );
@@ -98,125 +257,5 @@ class _ReportScreenState extends State<ReportScreen> {
         selectedYear = pickedYear;
       });
     }
-  }
-
-  List<Map<String, dynamic>> _filterData() {
-    final int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
-    final int quincenaEnd =
-        selectedQuincena == "Primera Quincena" ? 15 : daysInMonth;
-    final int quincenaStart = selectedQuincena == "Primera Quincena" ? 1 : 16;
-
-    return data.where((row) {
-      final DateTime rowDate =
-          DateTime.parse(row["fecha"].split('/').reversed.join('-'));
-      return rowDate.year == selectedYear &&
-          rowDate.month == selectedMonth &&
-          rowDate.day >= quincenaStart &&
-          rowDate.day <= quincenaEnd;
-    }).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
-    final String quincenaStart =
-        selectedQuincena == "Primera Quincena" ? "1" : "16";
-    final String quincenaEnd =
-        selectedQuincena == "Primera Quincena" ? "15" : daysInMonth.toString();
-
-    return Scaffold(
-      backgroundColor: backgroundWhite,
-      appBar: AppBar(
-        backgroundColor: backgroundWhite,
-        title: Text('Reporte'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _selectMonth(context),
-                  child: Text("Seleccionar Mes"),
-                ),
-                ElevatedButton(
-                  onPressed: () => _selectYear(context),
-                  child: Text("Seleccionar Año"),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Año seleccionado: $selectedYear',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  'Mes seleccionado: ${months[selectedMonth - 1]}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            DropdownButton<String>(
-              value: selectedQuincena,
-              items: [
-                DropdownMenuItem(
-                  value: "Primera Quincena",
-                  child: Text("Primera Quincena"),
-                ),
-                DropdownMenuItem(
-                  value: "Segunda Quincena",
-                  child: Text("Segunda Quincena"),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedQuincena = value!;
-                });
-              },
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Quincena seleccionada: $quincenaStart/$selectedMonth/$selectedYear - $quincenaEnd/$selectedMonth/$selectedYear',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Datos de la ${selectedQuincena.toLowerCase()} del $selectedMonth/$selectedYear',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: [
-                    DataColumn(label: Text('Fecha')),
-                    DataColumn(label: Text('Litros')),
-                    DataColumn(label: Text('Precio')),
-                  ],
-                  rows: _filterData()
-                      .map(
-                        (row) => DataRow(
-                          cells: [
-                            DataCell(Text(row["fecha"])),
-                            DataCell(Text(row["litros"].toString())),
-                            DataCell(Text(row["precio"].toString())),
-                          ],
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

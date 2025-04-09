@@ -12,6 +12,11 @@ class ActionButton extends StatelessWidget {
       onPressed: onTap,
       icon: icon,
       style: ButtonStyle(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
         backgroundColor: WidgetStateProperty.all(hunterGreen),
         foregroundColor: WidgetStateProperty.all(backgroundWhite),
       ),

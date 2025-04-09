@@ -12,98 +12,102 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: homeBackground,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                Image.asset(
-                  gift,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: 400, // Ajusta la altura según sea necesario
-                ),
-                const SizedBox(
-                    height: 100), // Espacio para el contenido restante
-              ],
-            ),
-            Positioned(
-              top: 350,
-              left: 20,
-              right: 20,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: backgroundWhite,
-                  borderRadius:
-                      BorderRadius.circular(15), // Esquinas redondeadas
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5.0,
-                      spreadRadius: 1.0,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Text(DateFormat.yMMMMd('es_ES').format(DateTime.now()),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: textblack,
-                        )),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: textblack,
-                        borderRadius: BorderRadius.circular(15),
-                        // Esquinas redondeadas
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 5.0,
-                            spreadRadius: 1.0,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Container(
+        color: homeBackground,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  Image.asset(
+                    gift,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 400, // Ajusta la altura según sea necesario
+                  ),
+                  const SizedBox(
+                      height: 100), // Espacio para el contenido restante
+                ],
+              ),
+              Positioned(
+                top: 350,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: backgroundWhite,
+                    borderRadius:
+                        BorderRadius.circular(15), // Esquinas redondeadas
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5.0,
+                        spreadRadius: 1.0,
+                        offset: Offset(0, 3),
                       ),
-                      height: 100,
-                      width: double.infinity,
-                      alignment: Alignment.centerLeft,
-                      child: const Text(
-                        "Litros de hoy",
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: textwhite,
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(DateFormat.yMMMMd('es_ES').format(DateTime.now()),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: textblack,
+                          )),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: textblack,
+                          borderRadius: BorderRadius.circular(15),
+                          // Esquinas redondeadas
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 5.0,
+                              spreadRadius: 1.0,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        height: 100,
+                        width: double.infinity,
+                        alignment: Alignment.centerLeft,
+                        child: const Text(
+                          "Litros de hoy",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: textwhite,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Button(
-                            label: "Registrar",
-                            onTap: () => Get.to(() => const RegisterScreen())),
-                        Button(
-                            label: "Ver Reporte",
-                            onTap: () => Get.to(() => ReportScreen())),
-                      ],
-                    ),
-                  ],
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Button(
+                              label: "Registrar",
+                              onTap: () =>
+                                  Get.to(() => const RegisterScreen())),
+                          Button(
+                              label: "Ver Reporte",
+                              onTap: () => Get.to(() => ReportScreen())),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

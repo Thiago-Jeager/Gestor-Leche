@@ -34,12 +34,17 @@ class MilkModel {
       total: map['total'],
     );
   }
+
+  @override
+  String toString() {
+    return 'Litros: $litros, Precio: $precio, Total: $total, ID: $id, Fecha: $fecha';
+  }
 }
 
 class Event {
   final String title;
 
-  const Event(this.title);
+  const Event({required this.title});
 
   @override
   String toString() => title;

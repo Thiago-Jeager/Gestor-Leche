@@ -11,7 +11,5 @@ const Color backgroundWhite = Color.fromRGBO(231, 231, 224, 1);
 const Color textwhite = Color.fromRGBO(255, 255, 255, 1);
 const Color citron = Color.fromRGBO(217, 195, 110, 1);
 const Color flax = Color.fromRGBO(238, 218, 141, 1);
-const Color ashGray2 =
-    Color.fromRGBO(163, 163, 163, 1); // Converted from hsla(60, 6%, 64%, 1)
-const Color ashGray3 =
-    Color.fromRGBO(191, 191, 191, 1); // Converted from hsla(60, 12%, 75%, 1)
+const Color ashGray2 = Color.fromRGBO(163, 163, 163, 1);
+const Color ashGray3 = Color.fromRGBO(191, 191, 191, 1);

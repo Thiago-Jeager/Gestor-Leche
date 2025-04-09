@@ -44,9 +44,9 @@ class DBHelper {
       'leche',
       {
         'fecha': fecha,
-        'litros': litros,
-        'precio': precio,
-        'total': litros * precio,
+        'litros': double.parse(litros.toStringAsFixed(2)),
+        'precio': double.parse(precio.toStringAsFixed(2)),
+        'total': double.parse((litros * precio).toStringAsFixed(2)),
       },
     );
   }
@@ -54,7 +54,7 @@ class DBHelper {
   // Método para obtener todos los registros
   Future<List<Map<String, dynamic>>> obtenerRegistros() async {
     final dbClient = await db;
-    return await dbClient.query('leche', orderBy: 'fecha DESC');
+    return await dbClient.query('leche', orderBy: 'fecha ASC');
   }
 
   // Método para actualizar un registro
@@ -65,9 +65,9 @@ class DBHelper {
       'leche',
       {
         'fecha': fecha,
-        'litros': litros,
-        'precio': precio,
-        'total': litros * precio,
+        'litros': double.parse(litros.toStringAsFixed(2)),
+        'precio': double.parse(precio.toStringAsFixed(2)),
+        'total': double.parse((litros * precio).toStringAsFixed(2)),
       },
       where: 'id = ?',
       whereArgs: [id],

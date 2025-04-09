@@ -6,6 +6,7 @@ import 'package:flutter_milk_app/controller/milk_controller.dart';
 import 'package:flutter_milk_app/model/milk_model.dart';
 import 'package:flutter_milk_app/widget/action_button.dart';
 import 'package:flutter_milk_app/widget/calendar_header.dart';
+import 'package:intl/intl.dart';
 //import 'package:flutter_milk_app/widget/button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -33,15 +34,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _litrosController = TextEditingController();
   final TextEditingController _precioController = TextEditingController();
 
-  final LinkedHashMap<DateTime, List<Event>> kEvents = LinkedHashMap(
+  final LinkedHashMap<DateTime, List<MilkModel>> kEvents = LinkedHashMap(
     equals: isSameDay,
     hashCode: getHashCode,
   );
   Future<void> _guardarRegistro() async {
     await _controller.agregarRegistroSiValido(
       fecha: _fechaController.text,
-      litrosTexto: _litrosController.text,
-      precioTexto: _precioController.text,
+      litrosTexto: _litrosController.text.replaceAll(',', '.'),
+      precioTexto: _precioController.text.replaceAll(',', '.'),
     );
     _litrosController.clear();
     _precioController.clear();
@@ -64,8 +65,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           kEvents[fecha] = [];
         }
 
-        kEvents[fecha]!.add(Event(
-            'Litros: ${registro['litros']}, Precio: ${registro['precio']}, Total: ${registro['total']}'));
+        kEvents[fecha]!.add(MilkModel(
+          id: registro['id'],
+          fecha: registro['fecha'],
+          litros: registro['litros'],
+          precio: registro['precio'],
+          total: registro['total'],
+        ));
       }
     });
   }
@@ -85,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: backgroundWhite,
       appBar: AppBar(
         backgroundColor: backgroundWhite,
-        title: const Text('Seleccionar Fecha y Número'),
+        title: const Text('Calendario de Registros'),
       ),
       body: Column(
         children: [
@@ -127,6 +133,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   if (value == null || value.isEmpty) {
                                     return 'Campo requerido';
                                   }
+                                  if (value == '0') {
+                                    return 'El # no puede ser 0';
+                                  }
+                                  if (!RegExp(r'^\d+(\.\d{1,2})?$')
+                                      .hasMatch(value)) {
+                                    return '2 decimales permitidos';
+                                  }
                                   return null;
                                 },
                                 controller: _litrosController,
@@ -139,6 +152,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Campo requerido';
+                                  }
+                                  if (value == '0') {
+                                    return 'El # no puede ser 0';
+                                  }
+                                  if (!RegExp(r'^\d+(\.\d{1,2})?$')
+                                      .hasMatch(value)) {
+                                    return '2 decimales permitidos';
                                   }
                                   return null;
                                 },
@@ -157,6 +177,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               backgroundColor: hunterGreen,
                             ),
                             onPressed: () {
+                              _litrosController.clear();
+                              _precioController.clear();
                               Navigator.of(context).pop();
                             },
                             child: const Text(
@@ -172,6 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               if (_formstate.currentState!.validate()) {
                                 final fecha =
                                     '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}';
+
                                 _fechaController.text = fecha;
                                 _guardarRegistro();
                                 cargarEventosDesdeBaseDeDatos();
@@ -215,10 +238,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
               setState(() {
                 _selectedDate = selectedDay;
               });
-              //_cargarRegistrosDelDia();
             },
             eventLoader: (day) {
-              return kEvents[day] ?? [];
+              return kEvents[day]?.map((milkModel) {
+                    return Event(
+                      title:
+                          'Litros: ${milkModel.litros}, Precio: ${milkModel.precio}, Total: ${milkModel.total}',
+                    );
+                  }).toList() ??
+                  [];
             },
             calendarStyle: const CalendarStyle(
               todayDecoration: BoxDecoration(
@@ -230,16 +258,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 shape: BoxShape.circle,
               ),
             ),
+            //Estilo
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, date, events) {
+                if (events.isNotEmpty) {
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      width: 10.0,
+                      height: 10.0,
+                      decoration: const BoxDecoration(
+                        color: cambridgeBlue,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  );
+                }
+                return null;
+              },
+            ),
           ),
           const SizedBox(height: 8.0),
           Expanded(
-            child: ValueListenableBuilder<List<Event>>(
+            child: ValueListenableBuilder<List<MilkModel>>(
               valueListenable: ValueNotifier(kEvents[_selectedDate] ?? []),
               builder: (context, value, _) {
                 return ListView.builder(
                   itemCount: value.length,
                   itemBuilder: (context, index) {
-                    final event = value[index];
+                    final milkModel = value[index];
                     return Container(
                       margin: const EdgeInsets.symmetric(
                         horizontal: 12.0,
@@ -256,62 +303,190 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                    'Litros: ${event.title.split(',')[0].split(':')[1].trim()}'),
-                                Text(
-                                    'Precio: ${event.title.split(',')[1].split(':')[1].trim()}'),
-                                Text(
-                                    'Total: ${event.title.split(',')[2].split(':')[1].trim()}'),
+                                Text('id: ${milkModel.id}'),
+                                Text('Fecha: ${milkModel.fecha}'),
+                                Text('Litros: ${milkModel.litros}'),
+                                Text('Precio: ${milkModel.precio}'),
+                                Text('Total: ${milkModel.total}'),
                               ],
                             ),
-                            ActionButton(
-                              icon: const Icon(Icons.edit),
-                              onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (context) {
-                                    return SingleChildScrollView(
-                                      child: Container(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            TextField(
-                                              controller: _litrosController,
-                                              decoration: const InputDecoration(
-                                                labelText: 'Litros',
-                                              ),
-                                              keyboardType:
-                                                  TextInputType.number,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                ActionButton(
+                                  icon: const Icon(Icons.edit),
+                                  onTap: () {
+                                    // Acción para editar
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          backgroundColor: backgroundWhite,
+                                          title: const Text('Editar Registro'),
+                                          content: Form(
+                                            key: _formstate,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextFormField(
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Campo requerido';
+                                                    }
+                                                    if (value == '0') {
+                                                      return 'El # no puede ser 0';
+                                                    }
+                                                    if (!RegExp(
+                                                            r'^\d+(\.\d{1,2})?$')
+                                                        .hasMatch(value)) {
+                                                      return '2 decimales permitidos';
+                                                    }
+                                                    return null;
+                                                  },
+                                                  controller: _litrosController
+                                                    ..text = milkModel.litros
+                                                        .toString(),
+                                                  decoration:
+                                                      const InputDecoration(
+                                                          labelText: 'Litros',
+                                                          errorStyle:
+                                                              TextStyle()),
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                ),
+                                                TextFormField(
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Campo requerido';
+                                                    }
+                                                    if (value == '0') {
+                                                      return 'El # no puede ser 0';
+                                                    }
+                                                    if (!RegExp(
+                                                            r'^\d+(\.\d{1,2})?$')
+                                                        .hasMatch(value)) {
+                                                      return '2 decimales permitidos';
+                                                    }
+                                                    return null;
+                                                  },
+                                                  controller: _precioController
+                                                    ..text = milkModel.precio
+                                                        .toString(),
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText: 'Precio',
+                                                  ),
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                ),
+                                              ],
                                             ),
-                                            TextField(
-                                              controller: _precioController,
-                                              decoration: const InputDecoration(
-                                                labelText: 'Precio',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: hunterGreen,
                                               ),
-                                              keyboardType:
-                                                  TextInputType.number,
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () async {
-                                                final fecha =
-                                                    '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}';
-                                                _fechaController.text = fecha;
-                                                cargarEventosDesdeBaseDeDatos();
+                                              onPressed: () {
+                                                _litrosController.clear();
+                                                _precioController.clear();
                                                 Navigator.of(context).pop();
                                               },
-                                              child: const Text('Actualizar'),
+                                              child: const Text(
+                                                'Cancelar',
+                                                style: TextStyle(
+                                                    color: backgroundWhite),
+                                              ),
+                                            ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: hunterGreen,
+                                              ),
+                                              onPressed: () async {
+                                                if (_formstate.currentState!
+                                                    .validate()) {
+                                                  await _controller
+                                                      .actualizarRegistro(
+                                                          milkModel.id!,
+                                                          milkModel.fecha,
+                                                          double.parse(
+                                                              _litrosController
+                                                                  .text),
+                                                          double.parse(
+                                                              _precioController
+                                                                  .text));
+                                                  await cargarEventosDesdeBaseDeDatos();
+                                                  Navigator.of(context)
+                                                      .pop(); // Cierra el diálogo
+                                                }
+                                              },
+                                              child: const Text(
+                                                'Actualizar',
+                                                style: TextStyle(
+                                                    color: backgroundWhite),
+                                              ),
                                             ),
                                           ],
-                                        ),
-                                      ),
+                                        );
+                                      },
                                     );
                                   },
-                                );
-                              },
+                                ),
+                                const SizedBox(height: 8.0),
+                                ActionButton(
+                                  icon: const Icon(Icons.delete),
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            backgroundColor: backgroundWhite,
+                                            title: const Text(
+                                                '¿Eliminar registro?'),
+                                            content: const Text(
+                                                '¿Estás seguro de que deseas eliminar este registro?'),
+                                            actions: [
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: hunterGreen,
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text(
+                                                  'Cancelar',
+                                                  style: TextStyle(
+                                                      color: backgroundWhite),
+                                                ),
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: hunterGreen,
+                                                ),
+                                                onPressed: () async {
+                                                  // Lógica para eliminar el registro
+                                                  await _controller
+                                                      .borrarRegistro(
+                                                          milkModel.id!);
+                                                  await cargarEventosDesdeBaseDeDatos();
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text(
+                                                  'Eliminar',
+                                                  style: TextStyle(
+                                                      color: backgroundWhite),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        });
+                                  },
+                                ),
+                              ],
                             ),
-                            const ActionButton(icon: Icon(Icons.delete)),
                           ],
                         ),
                       ),
