@@ -46,18 +46,33 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   List<MilkModel> _filterData() {
-    final int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
-    final int quincenaStart = selectedQuincena == "Primera Quincena" ? 1 : 16;
-    final int quincenaEnd =
-        selectedQuincena == "Primera Quincena" ? 15 : daysInMonth;
+    if (selectedQuincena == "Anual") {
+      // Filtrar por año completo
+      return _data.where((milkModel) {
+        final DateTime rowDate = DateTime.parse(milkModel.fecha);
+        return rowDate.year == selectedYear;
+      }).toList();
+    } else if (selectedQuincena == "Mensual") {
+      // Filtrar por mes completo
+      return _data.where((milkModel) {
+        final DateTime rowDate = DateTime.parse(milkModel.fecha);
+        return rowDate.year == selectedYear && rowDate.month == selectedMonth;
+      }).toList();
+    } else {
+      // Filtrar por quincena
+      final int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
+      final int quincenaStart = selectedQuincena == "Primera Quincena" ? 1 : 16;
+      final int quincenaEnd =
+          selectedQuincena == "Primera Quincena" ? 15 : daysInMonth;
 
-    return _data.where((milkModel) {
-      final DateTime rowDate = DateTime.parse(milkModel.fecha);
-      return rowDate.year == selectedYear &&
-          rowDate.month == selectedMonth &&
-          rowDate.day >= quincenaStart &&
-          rowDate.day <= quincenaEnd;
-    }).toList();
+      return _data.where((milkModel) {
+        final DateTime rowDate = DateTime.parse(milkModel.fecha);
+        return rowDate.year == selectedYear &&
+            rowDate.month == selectedMonth &&
+            rowDate.day >= quincenaStart &&
+            rowDate.day <= quincenaEnd;
+      }).toList();
+    }
   }
 
   @override
@@ -160,6 +175,14 @@ class _ReportScreenState extends State<ReportScreen> {
                   value: "Segunda Quincena",
                   child: Text("Segunda Quincena"),
                 ),
+                DropdownMenuItem(
+                  value: "Mensual",
+                  child: Text("Mensual"),
+                ),
+                DropdownMenuItem(
+                  value: "Anual",
+                  child: Text("Anual"),
+                ),
               ],
               onChanged: (value) {
                 setState(() {
@@ -174,55 +197,59 @@ class _ReportScreenState extends State<ReportScreen> {
                   : SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        columns: const [
-                          DataColumn(label: Text('Fecha')),
-                          DataColumn(label: Text('Litros')),
-                          DataColumn(label: Text('Precio')),
-                          DataColumn(label: Text('Total')),
-                        ],
-                        rows: [
-                          ..._filterData().map(
-                            (milkModel) => DataRow(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text('Fecha')),
+                            DataColumn(label: Text('Litros')),
+                            DataColumn(label: Text('Precio')),
+                            DataColumn(label: Text('Total')),
+                          ],
+                          rows: [
+                            ..._filterData().map(
+                              (milkModel) => DataRow(
+                                cells: [
+                                  DataCell(Text(milkModel.fecha)),
+                                  DataCell(Text(milkModel.litros.toString())),
+                                  DataCell(Text(milkModel.precio.toString())),
+                                  DataCell(Text(milkModel.total.toString())),
+                                ],
+                              ),
+                            ),
+                            // Fila de totales
+                            DataRow(
                               cells: [
-                                DataCell(Text(milkModel.fecha)),
-                                DataCell(Text(milkModel.litros.toString())),
-                                DataCell(Text(milkModel.precio.toString())),
-                                DataCell(Text(milkModel.total.toString())),
+                                const DataCell(Text(
+                                  'Total',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                )),
+                                DataCell(Text(
+                                  _filterData()
+                                      .fold<double>(
+                                          0.0, (sum, item) => sum + item.litros)
+                                      .toStringAsFixed(2),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                )),
+                                const DataCell(
+                                    Text('')), // Celda vacía para "Precio"
+                                DataCell(Text(
+                                  _filterData()
+                                      .fold<double>(
+                                          0.0, (sum, item) => sum + item.total)
+                                      .toStringAsFixed(2),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                )),
                               ],
                             ),
-                          ),
-                          // Fila de totales
-                          DataRow(
-                            cells: [
-                              const DataCell(Text(
-                                'Total',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              )),
-                              DataCell(Text(
-                                _filterData()
-                                    .fold<double>(
-                                        0.0, (sum, item) => sum + item.litros)
-                                    .toStringAsFixed(2),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              )),
-                              const DataCell(
-                                  Text('')), // Celda vacía para "Precio"
-                              DataCell(Text(
-                                _filterData()
-                                    .fold<double>(
-                                        0.0, (sum, item) => sum + item.total)
-                                    .toStringAsFixed(2),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              )),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-            ),
+            )
           ],
         ),
       ),
