@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/const/images.dart';
+import 'package:flutter_milk_app/const/strings.dart';
 
 class InfoScreen extends StatelessWidget {
   const InfoScreen({super.key});
@@ -35,7 +36,7 @@ class InfoScreen extends StatelessWidget {
               const SizedBox(height: 20),
               // App Name
               const Text(
-                'Flutter Milk App',
+                appname,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -45,7 +46,7 @@ class InfoScreen extends StatelessWidget {
               const SizedBox(height: 10),
               // App Version
               Text(
-                'Versión: 1.0.0',
+                appversion,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[700],
@@ -54,7 +55,7 @@ class InfoScreen extends StatelessWidget {
               const SizedBox(height: 20),
               // Developer Name
               const Text(
-                'Desarrollado por: Santiago',
+                'Desarrollado por: $credits',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -76,7 +77,7 @@ class InfoScreen extends StatelessWidget {
               const Spacer(),
               // Footer
               Text(
-                '© 2025 Flutter Milk App',
+                copyright,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/const/images.dart';
+import 'package:flutter_milk_app/const/strings.dart';
 import 'package:flutter_milk_app/view/Home_screen/home.dart';
 import 'package:get/get.dart';
 
@@ -33,7 +34,7 @@ class _SplashViewState extends State<SplashView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Milky App"),
+            const Text(appname),
             const SizedBox(
               height: 20,
             ),
@@ -45,7 +46,7 @@ class _SplashViewState extends State<SplashView> {
             const SizedBox(
               height: 20,
             ),
-            const Text("Version 1.0.0",
+            const Text(appversion,
                 style: TextStyle(
                   fontSize: 20,
                   color: textblack,
@@ -53,7 +54,11 @@ class _SplashViewState extends State<SplashView> {
             const SizedBox(
               height: 20,
             ),
-            const Text("Desarrollado por: Yo"),
+            const Text("Desarrollado por: $credits",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: textblack,
+                )),
           ],
         ),
       ),
