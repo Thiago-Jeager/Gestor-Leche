@@ -16,6 +16,14 @@ dependencies:
   path: ^1.8.3
   intl: ^0.20.2
 
+  #crear pdf
+  pdf: ^3.10.0
+  #Abrir pdf
+  open_file: ^3.2.1
+  #path
+  path_provider: ^2.0.14
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

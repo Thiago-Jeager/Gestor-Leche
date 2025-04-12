@@ -14,20 +14,14 @@ class Home extends StatelessWidget {
 
     var navBarItem = [
       BottomNavigationBarItem(
-          icon: Image.asset(icLogo, width: 26), label: "asd"),
+          icon: Image.asset(icLogo, width: 26), label: "Inicio"),
       BottomNavigationBarItem(
-          icon: Image.asset(icLogo, width: 26), label: "asd"),
-      BottomNavigationBarItem(
-          icon: Image.asset(icLogo, width: 26), label: "asd"),
-      BottomNavigationBarItem(
-          icon: Image.asset(icLogo, width: 26), label: "asd")
+          icon: Image.asset(icLogo, width: 26), label: "Info"),
     ];
 
     var navBody = [
       const HomeScreen(),
       const Text('home'),
-      const Text("home"),
-      const Text("home"),
     ];
     return Scaffold(
       body: Column(

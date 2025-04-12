@@ -1,14 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/const/images.dart';
+import 'package:flutter_milk_app/model/db_helper.dart';
 import 'package:flutter_milk_app/view/Register_screen/register_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_milk_app/view/Report_screen/report_screen.dart';
 import 'package:flutter_milk_app/widget/button.dart';
 import 'package:get/get.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final DBHelper _dbHelper = DBHelper();
+  double _litrosHoy = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarLitrosDelDia();
+  }
+
+  Future<void> _cargarLitrosDelDia() async {
+    final String fechaHoy = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final registros = await _dbHelper.obtenerRegistrosPorFecha(fechaHoy);
+
+    setState(() {
+      _litrosHoy = registros.fold<double>(
+        0.0,
+        (sum, registro) => sum + (registro['litros'] as double),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +105,10 @@ class HomeScreen extends StatelessWidget {
                         height: 100,
                         width: double.infinity,
                         alignment: Alignment.centerLeft,
-                        child: const Text(
-                          "Litros de hoy",
+                        child: Text(
+                          "Litros de hoy: $_litrosHoy",
                           textAlign: TextAlign.start,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 20,
                             color: textwhite,
                           ),

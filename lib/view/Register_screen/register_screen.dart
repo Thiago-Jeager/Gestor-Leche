@@ -302,7 +302,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('id: ${milkModel.id}'),
                                 Text('Fecha: ${milkModel.fecha}'),
                                 Text('Litros: ${milkModel.litros}'),
                                 Text('Precio: ${milkModel.precio}'),

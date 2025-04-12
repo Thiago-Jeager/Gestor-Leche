@@ -3,10 +3,13 @@ import 'package:flutter_milk_app/const/colors.dart';
 import 'package:flutter_milk_app/const/const.dart';
 import 'package:flutter_milk_app/controller/milk_controller.dart';
 import 'package:flutter_milk_app/model/milk_model.dart';
+import 'package:flutter_milk_app/view/Report_screen/report_pdf.dart';
 import 'package:flutter_milk_app/widget/report_button.dart';
 import 'package:intl/intl.dart';
 
 class ReportScreen extends StatefulWidget {
+  const ReportScreen({super.key});
+
   @override
   _ReportScreenState createState() => _ReportScreenState();
 }
@@ -82,6 +85,28 @@ class _ReportScreenState extends State<ReportScreen> {
       appBar: AppBar(
         backgroundColor: backgroundWhite,
         title: const Text('Reporte'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: () async {
+              // Obtener los datos filtrados
+              final datosFiltrados = _filterData();
+
+              // Determinar el filtro seleccionado
+              String filtro = selectedQuincena == "Primera Quincena"
+                  ? "Primera Quincena"
+                  : selectedQuincena == "Segunda Quincena"
+                      ? "Segunda Quincena"
+                      : selectedQuincena == "Mensual"
+                          ? "Mensual"
+                          : "Anual";
+
+              // Generar el PDF
+              await generarPDF(
+                  datosFiltrados, filtro, selectedYear, selectedMonth, context);
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
