@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:flutter_milk_app/model/milk_model.dart';
 
@@ -37,7 +36,7 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
                 ),
                 pw.Text(
                   'Generado el: ${DateFormat('yyyy/MM/dd HH:mm').format(DateTime.now())}',
-                  style: pw.TextStyle(fontSize: 14),
+                  style: const pw.TextStyle(fontSize: 14),
                 ),
               ],
             ),
@@ -46,12 +45,12 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
               filtro.contains("Anual")
                   ? 'Año: $selectedYear'
                   : 'Mes: $mesSeleccionado $selectedYear',
-              style: pw.TextStyle(fontSize: 14),
+              style: const pw.TextStyle(fontSize: 14),
             ),
             pw.SizedBox(height: 20),
             pw.Table(
               border: pw.TableBorder.symmetric(
-                inside: pw.BorderSide(width: 0.5),
+                inside: const pw.BorderSide(width: 0.5),
               ),
               children: [
                 pw.TableRow(
@@ -102,7 +101,7 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
                       ),
                     ],
                   );
-                }).toList(),
+                }),
               ],
             ),
             pw.Divider(),
@@ -125,7 +124,7 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
                     ),
                     pw.Text(
                       '${data.fold<double>(0.0, (sum, item) => sum + item.litros).toStringAsFixed(2)} lts',
-                      style: pw.TextStyle(fontSize: 14),
+                      style: const pw.TextStyle(fontSize: 14),
                     ),
                     pw.Text(
                       'Precio Total: ',
@@ -134,7 +133,7 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
                     ),
                     pw.Text(
                       '\$${data.fold<double>(0.0, (sum, item) => sum + item.total).toStringAsFixed(2)}',
-                      style: pw.TextStyle(fontSize: 14),
+                      style: const pw.TextStyle(fontSize: 14),
                     ),
                   ],
                 ),
@@ -148,22 +147,31 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
 
   // Guardar el PDF en el directorio de documentos
   try {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = Directory('/storage/emulated/0/Documents');
+    // Crear la carpeta "milk_controller" dentro de "Documents"
+    final milkControllerDir = Directory('${directory.path}/milk_controller');
+    if (!await milkControllerDir.exists()) {
+      await milkControllerDir.create(recursive: true);
+    }
+
     final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final file = File('${directory.path}/reporte_$filtro _ $timestamp.pdf');
+    final file =
+        File('${milkControllerDir.path}/reporte_$filtro _ $timestamp.pdf');
     await file.writeAsBytes(await pdf.save());
-    print(file);
+    //print(file);
     // Abrir el archivo PDF
     await OpenFile.open(file.path);
 
     // Mostrar un mensaje de éxito
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('PDF guardado en: ${file.path}')),
     );
   } catch (e) {
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error al guardar el PDF: $e')),
     );
-    print(e);
+    //print(e);
   }
 }

@@ -11,6 +11,7 @@ class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ReportScreenState createState() => _ReportScreenState();
 }
 
@@ -164,8 +165,8 @@ class _ReportScreenState extends State<ReportScreen> {
                     const SizedBox(height: 5),
                     Text(
                       selectedQuincena == "Primera Quincena"
-                          ? "1-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}"
-                          : "16-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}",
+                          ? "1-${selectedMonth.toString().padLeft(2, '0')}-$selectedYear"
+                          : "16-${selectedMonth.toString().padLeft(2, '0')}-$selectedYear",
                       style: const TextStyle(fontSize: 16),
                     ),
                   ],
@@ -180,8 +181,8 @@ class _ReportScreenState extends State<ReportScreen> {
                     const SizedBox(height: 5),
                     Text(
                       selectedQuincena == "Primera Quincena"
-                          ? "15-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}"
-                          : "${DateTime(selectedYear, selectedMonth + 1, 0).day}-${selectedMonth.toString().padLeft(2, '0')}-${selectedYear}",
+                          ? "15-${selectedMonth.toString().padLeft(2, '0')}-$selectedYear"
+                          : "${DateTime(selectedYear, selectedMonth + 1, 0).day}-${selectedMonth.toString().padLeft(2, '0')}-$selectedYear",
                       style: const TextStyle(fontSize: 16),
                     ),
                   ],

@@ -23,7 +23,7 @@ class InfoScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // App Logo
               const Center(
                 child: CircleAvatar(
@@ -32,9 +32,9 @@ class InfoScreen extends StatelessWidget {
                       AssetImage(icLogo), // Replace with your logo path
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // App Name
-              Text(
+              const Text(
                 'Flutter Milk App',
                 style: TextStyle(
                   fontSize: 24,
@@ -42,7 +42,7 @@ class InfoScreen extends StatelessWidget {
                   color: textblack,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               // App Version
               Text(
                 'Versión: 1.0.0',
@@ -51,9 +51,9 @@ class InfoScreen extends StatelessWidget {
                   color: Colors.grey[700],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Developer Name
-              Text(
+              const Text(
                 'Desarrollado por: Santiago',
                 style: TextStyle(
                   fontSize: 18,
@@ -61,7 +61,7 @@ class InfoScreen extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Description
               Text(
                 'Flutter Milk App es una aplicación diseñada para gestionar y '
@@ -73,7 +73,7 @@ class InfoScreen extends StatelessWidget {
                   color: Colors.grey[800],
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               // Footer
               Text(
                 '© 2025 Flutter Milk App',

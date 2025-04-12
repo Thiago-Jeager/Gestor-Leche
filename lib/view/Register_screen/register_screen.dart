@@ -422,6 +422,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                   Get.find<HomeController>()
                                                       .cargarLitrosDelDia();
                                                   await cargarEventosDesdeBaseDeDatos();
+                                                  // ignore: use_build_context_synchronously
                                                   Navigator.of(context)
                                                       .pop(); // Cierra el diálogo
                                                 }
@@ -475,6 +476,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                       .borrarRegistro(
                                                           milkModel.id!);
                                                   await cargarEventosDesdeBaseDeDatos();
+                                                  // ignore: use_build_context_synchronously
                                                   Navigator.of(context).pop();
                                                 },
                                                 child: const Text(

@@ -13,6 +13,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async => false,
       child: Container(
@@ -104,7 +105,7 @@ class HomeScreen extends StatelessWidget {
                                   Get.to(() => const RegisterScreen())),
                           Button(
                               label: "Ver Reporte",
-                              onTap: () => Get.to(() => ReportScreen())),
+                              onTap: () => Get.to(() => const ReportScreen())),
                         ],
                       ),
                     ],
