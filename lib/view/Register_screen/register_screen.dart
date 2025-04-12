@@ -2,10 +2,12 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
+import 'package:flutter_milk_app/controller/home_controller.dart';
 import 'package:flutter_milk_app/controller/milk_controller.dart';
 import 'package:flutter_milk_app/model/milk_model.dart';
 import 'package:flutter_milk_app/widget/action_button.dart';
 import 'package:flutter_milk_app/widget/calendar_header.dart';
+import 'package:get/get.dart';
 //import 'package:flutter_milk_app/widget/button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -197,6 +199,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 _fechaController.text = fecha;
                                 _guardarRegistro();
                                 cargarEventosDesdeBaseDeDatos();
+                                Get.find<HomeController>().cargarLitrosDelDia();
                                 Navigator.of(context)
                                     .pop(); // Cierra el diálogo
                               }
@@ -416,6 +419,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                           double.parse(
                                                               _precioController
                                                                   .text));
+                                                  Get.find<HomeController>()
+                                                      .cargarLitrosDelDia();
                                                   await cargarEventosDesdeBaseDeDatos();
                                                   Navigator.of(context)
                                                       .pop(); // Cierra el diálogo
