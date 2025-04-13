@@ -5,7 +5,10 @@ import 'package:flutter_milk_app/controller/milk_controller.dart';
 import 'package:flutter_milk_app/model/milk_model.dart';
 import 'package:flutter_milk_app/view/Report_screen/report_pdf.dart';
 import 'package:flutter_milk_app/widget/report_button.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
+import '../../controller/user_controller.dart';
 
 class ReportScreen extends StatefulWidget {
   final int userId; // Recibir el ID del usuario seleccionado
@@ -18,6 +21,8 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   final MilkController _controller = MilkController();
+  final UserController _userController =
+      Get.find<UserController>(); // Obtén el controlador de usuario
   List<MilkModel> _data =
       []; // Lista para almacenar los datos de la base de datos
   bool _isLoading = true; // Indicador de carga
@@ -103,10 +108,14 @@ class _ReportScreenState extends State<ReportScreen> {
                       : selectedQuincena == "Mensual"
                           ? "Mensual"
                           : "Anual";
-
+// Obtener el nombre del usuario seleccionado
+              final usuario = _userController.usuarioSeleccionado.value;
+              final userName = usuario != null
+                  ? '${usuario.nombre} ${usuario.apellido}'
+                  : 'Usuario no seleccionado';
               // Generar el PDF
-              await generarPDF(
-                  datosFiltrados, filtro, selectedYear, selectedMonth, context);
+              await generarPDF(datosFiltrados, filtro, selectedYear,
+                  selectedMonth, userName, context);
             },
           ),
         ],
@@ -115,12 +124,29 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Center(
-              child: Text(
-                DateFormat.yMMMMd('es_ES').format(DateTime.now()),
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Obx(() {
+                  final usuario = _userController.usuarioSeleccionado.value;
+                  String userName = usuario != null
+                      ? '${usuario.nombre} ${usuario.apellido}'
+                      : 'Usuario no seleccionado';
+                  return Text(
+                    userName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textblack,
+                    ),
+                  );
+                }),
+                Text(
+                  DateFormat.yMMMMd('es_ES').format(DateTime.now()),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             Row(

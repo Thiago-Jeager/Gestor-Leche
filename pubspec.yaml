@@ -21,7 +21,7 @@ dependencies:
   #Abrir pdf
   open_file: ^3.2.1
   #path
-  path_provider: ^2.0.14
+
 
 
 dev_dependencies:

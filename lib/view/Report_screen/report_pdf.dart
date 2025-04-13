@@ -7,7 +7,7 @@ import 'package:open_file/open_file.dart';
 import 'package:flutter_milk_app/model/milk_model.dart';
 
 Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
-    int selectedMonth, BuildContext context) async {
+    int selectedMonth, String userName, BuildContext context) async {
   final pdf = pw.Document();
 
   // Obtener el mes y el año seleccionados
@@ -34,18 +34,50 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
                   style: pw.TextStyle(
                       fontSize: 14, fontWeight: pw.FontWeight.bold),
                 ),
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'Generado el: ',
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      DateFormat('yyyy/MM/dd HH:mm').format(DateTime.now()),
+                      style: const pw.TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 4),
+            pw.Row(
+              children: [
                 pw.Text(
-                  'Generado el: ${DateFormat('yyyy/MM/dd HH:mm').format(DateTime.now())}',
+                  'Usuario: ',
+                  style: pw.TextStyle(
+                      fontSize: 14, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.Text(
+                  userName,
                   style: const pw.TextStyle(fontSize: 14),
                 ),
               ],
             ),
-            pw.SizedBox(width: 10),
-            pw.Text(
-              filtro.contains("Anual")
-                  ? 'Año: $selectedYear'
-                  : 'Mes: $mesSeleccionado $selectedYear',
-              style: const pw.TextStyle(fontSize: 14),
+            pw.SizedBox(height: 4),
+            pw.Row(
+              children: [
+                pw.Text(
+                  filtro.contains("Anual") ? 'Año: ' : 'Mes: ',
+                  style: pw.TextStyle(
+                      fontSize: 14, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.Text(
+                  filtro.contains("Anual")
+                      ? '$selectedYear'
+                      : '$mesSeleccionado $selectedYear',
+                  style: const pw.TextStyle(fontSize: 14),
+                ),
+              ],
             ),
             pw.SizedBox(height: 20),
             pw.Table(
@@ -112,28 +144,40 @@ Future<void> generarPDF(List<MilkModel> data, String filtro, int selectedYear,
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
-                      'Total:',
-                      style: pw.TextStyle(
-                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    pw.Row(
+                      children: [
+                        pw.Text(
+                          'Total:',
+                          style: pw.TextStyle(
+                              fontSize: 14, fontWeight: pw.FontWeight.bold),
+                        ),
+                      ],
                     ),
-                    pw.Text(
-                      'Litros: ',
-                      style: pw.TextStyle(
-                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    pw.Row(
+                      children: [
+                        pw.Text(
+                          'Litros: ',
+                          style: pw.TextStyle(
+                              fontSize: 14, fontWeight: pw.FontWeight.bold),
+                        ),
+                        pw.Text(
+                          '${data.fold<double>(0.0, (sum, item) => sum + item.litros).toStringAsFixed(2)} lts',
+                          style: const pw.TextStyle(fontSize: 14),
+                        ),
+                      ],
                     ),
-                    pw.Text(
-                      '${data.fold<double>(0.0, (sum, item) => sum + item.litros).toStringAsFixed(2)} lts',
-                      style: const pw.TextStyle(fontSize: 14),
-                    ),
-                    pw.Text(
-                      'Precio Total: ',
-                      style: pw.TextStyle(
-                          fontSize: 14, fontWeight: pw.FontWeight.bold),
-                    ),
-                    pw.Text(
-                      '\$${data.fold<double>(0.0, (sum, item) => sum + item.total).toStringAsFixed(2)}',
-                      style: const pw.TextStyle(fontSize: 14),
+                    pw.Row(
+                      children: [
+                        pw.Text(
+                          'Precio: ',
+                          style: pw.TextStyle(
+                              fontSize: 14, fontWeight: pw.FontWeight.bold),
+                        ),
+                        pw.Text(
+                          '\$${data.fold<double>(0.0, (sum, item) => sum + item.total).toStringAsFixed(2)}',
+                          style: const pw.TextStyle(fontSize: 14),
+                        ),
+                      ],
                     ),
                   ],
                 ),
