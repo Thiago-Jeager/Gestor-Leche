@@ -2,12 +2,10 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_milk_app/const/colors.dart';
-import 'package:flutter_milk_app/controller/home_controller.dart';
 import 'package:flutter_milk_app/controller/milk_controller.dart';
 import 'package:flutter_milk_app/model/milk_model.dart';
 import 'package:flutter_milk_app/widget/action_button.dart';
 import 'package:flutter_milk_app/widget/calendar_header.dart';
-import 'package:get/get.dart';
 //import 'package:flutter_milk_app/widget/button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -16,7 +14,8 @@ int getHashCode(DateTime key) {
 }
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final int userId; // Recibir el ID del usuario seleccionado
+  const RegisterScreen({super.key, required this.userId});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -44,13 +43,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       fecha: _fechaController.text,
       litrosTexto: _litrosController.text.replaceAll(',', '.'),
       precioTexto: _precioController.text.replaceAll(',', '.'),
+      userId: widget.userId, // Asociar el registro con el usuario seleccionado
     );
     _litrosController.clear();
     _precioController.clear();
   }
 
   Future<void> cargarEventosDesdeBaseDeDatos() async {
-    final registros = await _controller.obtenerRegistros();
+    final registros =
+        await _controller.obtenerRegistrosPorUsuario(widget.userId);
 
     setState(() {
       kEvents.clear();
@@ -72,6 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           litros: registro['litros'],
           precio: registro['precio'],
           total: registro['total'],
+          userId: registro['userId'], // Asociar con el usuario
         ));
       }
     });
@@ -199,7 +201,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 _fechaController.text = fecha;
                                 _guardarRegistro();
                                 cargarEventosDesdeBaseDeDatos();
-                                Get.find<HomeController>().cargarLitrosDelDia();
                                 Navigator.of(context)
                                     .pop(); // Cierra el diálogo
                               }
@@ -419,8 +420,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                           double.parse(
                                                               _precioController
                                                                   .text));
-                                                  Get.find<HomeController>()
-                                                      .cargarLitrosDelDia();
+                                                  //Get.find<HomeController>()
+                                                  //    .cargarLitrosDelDia();
                                                   await cargarEventosDesdeBaseDeDatos();
                                                   // ignore: use_build_context_synchronously
                                                   Navigator.of(context)

@@ -4,6 +4,7 @@ class MilkModel {
   final double litros;
   final double precio;
   final double total;
+  final int userId; // Nuevo campo para asociar con el usuario
 
   MilkModel({
     this.id,
@@ -11,6 +12,7 @@ class MilkModel {
     required this.litros,
     required this.precio,
     required this.total,
+    required this.userId,
   });
 
   // Convert a MilkModel into a Map. The keys must correspond to the column names in the database.
@@ -21,6 +23,7 @@ class MilkModel {
       'litros': litros,
       'precio': precio,
       'total': total,
+      'userId': userId,
     };
   }
 
@@ -32,6 +35,7 @@ class MilkModel {
       litros: map['litros'],
       precio: map['precio'],
       total: map['total'],
+      userId: map['userId'], // Asociar con el usuario
     );
   }
 

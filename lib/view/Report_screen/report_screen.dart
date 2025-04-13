@@ -8,7 +8,8 @@ import 'package:flutter_milk_app/widget/report_button.dart';
 import 'package:intl/intl.dart';
 
 class ReportScreen extends StatefulWidget {
-  const ReportScreen({super.key});
+  final int userId; // Recibir el ID del usuario seleccionado
+  const ReportScreen({super.key, required this.userId});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -32,7 +33,8 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Future<void> _loadData() async {
-    final registros = await _controller.obtenerRegistros();
+    final registros =
+        await _controller.obtenerRegistrosPorUsuario(widget.userId);
     setState(() {
       _data = registros.map((registro) {
         // Asegúrate de que la fecha tenga el formato correcto

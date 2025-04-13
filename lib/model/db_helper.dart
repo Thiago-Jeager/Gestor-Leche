@@ -25,20 +25,42 @@ class DBHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // Crear la tabla usuario
+    await db.execute('''
+      CREATE TABLE usuario (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        apellido TEXT NOT NULL
+      )
+    ''');
+
+    // Insertar usuarios predeterminados
+    await db.insert('usuario', {'nombre': 'Yesenia', 'apellido': 'Loachamin'});
+    await db.insert('usuario', {'nombre': 'Rosa', 'apellido': 'Cola'});
+
+    // Crear la tabla leche
     await db.execute('''
       CREATE TABLE leche (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         fecha TEXT NOT NULL,
         litros REAL NOT NULL,
         precio REAL NOT NULL,
-        total REAL NOT NULL
+        total REAL NOT NULL,
+        userId INTEGER NOT NULL,
+        FOREIGN KEY (userId) REFERENCES usuario (id) ON DELETE CASCADE
       )
     ''');
   }
 
+  // Obtener todos los usuarios
+  Future<List<Map<String, dynamic>>> obtenerUsuarios() async {
+    final dbClient = await db;
+    return await dbClient.query('usuario', orderBy: 'id ASC');
+  }
+
   // Método para insertar registro
   Future<int> insertarRegistro(
-      String fecha, double litros, double precio) async {
+      String fecha, double litros, double precio, int userId) async {
     final dbClient = await db;
     return await dbClient.insert(
       'leche',
@@ -47,6 +69,7 @@ class DBHelper {
         'litros': double.parse(litros.toStringAsFixed(2)),
         'precio': double.parse(precio.toStringAsFixed(2)),
         'total': double.parse((litros * precio).toStringAsFixed(2)),
+        'userId': userId, // Asociar el registro con el usuario
       },
     );
   }
@@ -55,6 +78,18 @@ class DBHelper {
   Future<List<Map<String, dynamic>>> obtenerRegistros() async {
     final dbClient = await db;
     return await dbClient.query('leche', orderBy: 'fecha ASC');
+  }
+
+  // Método para obtener registros por usuario
+  Future<List<Map<String, dynamic>>> obtenerRegistrosPorUsuario(
+      int userId) async {
+    final dbClient = await db;
+    return await dbClient.query(
+      'leche',
+      where: 'userId = ?',
+      whereArgs: [userId],
+      orderBy: 'fecha ASC',
+    );
   }
 
   // Método para actualizar un registro
@@ -86,12 +121,12 @@ class DBHelper {
 
   // Método para obtener registros por fecha
   Future<List<Map<String, dynamic>>> obtenerRegistrosPorFecha(
-      String fecha) async {
+      String fecha, int userId) async {
     final dbClient = await db;
     return await dbClient.query(
       'leche',
-      where: 'fecha = ?',
-      whereArgs: [fecha],
+      where: 'fecha = ? AND userId = ?',
+      whereArgs: [fecha, userId],
       orderBy: 'id DESC',
     );
   }

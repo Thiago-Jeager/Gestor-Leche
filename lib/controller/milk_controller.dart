@@ -9,6 +9,7 @@ class MilkController {
     required String fecha,
     required String litrosTexto,
     required String precioTexto,
+    required int userId,
   }) async {
     if (litrosTexto.isNotEmpty && precioTexto.isNotEmpty) {
       double litros = double.tryParse(litrosTexto) ?? 0.0;
@@ -21,7 +22,7 @@ class MilkController {
         ),
       ); // Formatear la fecha correctamente
       if (litros > 0 && precio > 0) {
-        await _dbHelper.insertarRegistro(fecha, litros, precio);
+        await _dbHelper.insertarRegistro(fecha, litros, precio, userId);
       }
     }
   }
@@ -44,5 +45,10 @@ class MilkController {
 
   Future<List<Map<String, dynamic>>> obtenerRegistros() async {
     return await _dbHelper.obtenerRegistros();
+  }
+
+  Future<List<Map<String, dynamic>>> obtenerRegistrosPorUsuario(
+      int userId) async {
+    return await _dbHelper.obtenerRegistrosPorUsuario(userId);
   }
 }
